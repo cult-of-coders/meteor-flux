@@ -6,11 +6,9 @@ This is the most basic, most intuitive, and easy to use flux implementation.
 You have a single main store in your dispatcher.
 You can use multiple stores in your store.
 
-
 The Store
 =====================================
 Store is an extended version of local Mongo.Collection.
-Set and get, play with a document like {key: 'key', value: 'value'}
 
 ```
 let store = new Store(defaults); // optionally specify defaults
@@ -22,11 +20,11 @@ store.set('key', 'value'); // value can be object, function, array, whatever
 store.get('key'); // returns the value, returns undefined if it can't find it
 store.get('key', defaultValue);  // returns the value, returns defaultValue it can't find it.
 
-// if you are using store for array-like storing
-store.fetch(filters, options) will return all elements from it using filters and options as you are accustomed with .find()
+// if you are using store for arrays
+store.fetch(filters, options) will return all elements from it using filters and options as you are accustomed with .find().fetch()
 
 // by default the fetch() in Store is reactive!
-// this can help you avoid subscribing to a store. 
+// this can help you avoid subscribing to a store in Blaze.
 
 // if you want to disable reactivity, for any reason:
 store.fetch({}, {reactive: false});
@@ -56,8 +54,6 @@ store.on('changed', (newDocument, oldDocument) => {
 store.on('added', (document) => {});
 store.on('removed', (document) => {});
 
-// trigger update event forcefully
-store.triggerUpdate();
 ```
 
 Dispatcher
@@ -95,7 +91,7 @@ dispatcher.register(({action, data, store}) => {
         case 'ADD_TODO':
             store.get('todos').insert(data);
         case 'UPDATE_TODO':
-            const {_id, toDoData} = data;
+            const {_id, ...toDoData} = data;
             store.get('todos').update(_id, {$set: toDoData});
         case 'SET_SPECIAL_FILTER':
             store.update('filters', {$set: {'specialFilter': data});
@@ -105,7 +101,7 @@ dispatcher.register(({action, data, store}) => {
 Nesting Stores
 =====================================
 If you store the application state in one place, that place can become huge, and every change happening in a small portion of your app,
-will go through a lot of listeners. However, you can listen to changes on specific stores.
+will propagate to many unecessary listeners. However, you can listen to changes on specific stores.
 
 ```
 const dispatcher = new Dispatcher({
@@ -122,7 +118,7 @@ const filters = dispatcher.store.get('filters')
 filters.get('moreComplexity').subscribe(callback)
 ```
 
-Nested stores don't propagate update to the parent by default. However you can configure them to do so in the constructor:
+Nested stores don't propagate "updated" event to the parent by default. However you can configure them to do so in the constructor:
 ```
 const dispatcher = new Dispatcher({
     'filters': new Store({
@@ -161,7 +157,7 @@ dispatcher.register('ADD_TODO', ({data, store}) => {
 
 Template.ToDoList.helpers({
     todos() {
-        const todos = dispatcher.store.get('todos');
+        let todos = dispatcher.store.get('todos');
         
         return todos.fetch();
     }
@@ -173,3 +169,8 @@ Template.ToDoList.events({
     }
 });
 ```
+
+More documentation on how to use with React will follow.
+=====================================
+
+To do...
