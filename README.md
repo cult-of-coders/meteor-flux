@@ -54,6 +54,8 @@ store.on('changed', (newDocument, oldDocument) => {
 store.on('added', (document) => {});
 store.on('removed', (document) => {});
 
+store.forceUpdate() // will trigger the 'updated' event.
+
 ```
 
 Dispatcher
@@ -86,6 +88,7 @@ dispatcher.store.subscribe(callback);
 Updating Array/Object Elements in Stores
 =======================================
 // listening to all dispatched actions
+```
 dispatcher.register(({action, data, store}) => {
     switch (action) {
         case 'ADD_TODO':
@@ -97,6 +100,7 @@ dispatcher.register(({action, data, store}) => {
             store.update('filters', {$set: {'specialFilter': data});
     }
 })
+```
 
 Nesting Stores
 =====================================
